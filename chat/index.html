@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#090b12">
+<title>Qwen AI — Ethereal Studios</title>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
+<style>
+:root{color-scheme:dark;--bg:#090b12;--panel:#101522;--panel2:#171e2d;--border:#252e40;--text:#edf1fa;--muted:#8995aa;--accent:#8b7cff;--accent2:#5e9cff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.55 system-ui,-apple-system,Segoe UI,sans-serif;height:100dvh;overflow:hidden}
+button,input,textarea{font:inherit}
+button{cursor:pointer;color:inherit}
+.app{height:100dvh;display:flex;flex-direction:column;max-width:1100px;margin:auto}
+header{height:65px;flex-shrink:0;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 18px;background:#0c101a}
+.brand{display:flex;align-items:center;gap:11px;font-weight:700}
+.logo{width:35px;height:35px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;font-size:19px}
+.brand small{display:block;color:var(--muted);font-size:11px;font-weight:400}
+.actions{display:flex;gap:8px}
+.btn{border:1px solid var(--border);background:var(--panel2);border-radius:10px;padding:8px 12px;font-size:13px}
+.btn:hover{border-color:var(--accent)}
+.status{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:7px}
+.dot{width:7px;height:7px;border-radius:50%;background:#e0a34d}
+.dot.online{background:#36d995}
+main{flex:1;overflow-y:auto;padding:25px 18px 35px;scroll-behavior:smooth}
+#messages{max-width:780px;margin:auto}
+.welcome{text-align:center;padding:12vh 12px 35px}
+.welcome .orb{font-size:42px;margin-bottom:15px}
+.welcome h1{font-size:clamp(25px,5vw,38px);margin:0 0 9px;letter-spacing:-1px}
+.welcome p{color:var(--muted);margin:0 auto 25px;max-width:460px}
+.suggestions{display:flex;flex-wrap:wrap;justify-content:center;gap:9px}
+.suggestions button{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:10px 13px;color:#c5cce0;font-size:13px}
+.suggestions button:hover{border-color:var(--accent)}
+.message{display:flex;gap:12px;margin:22px 0;align-items:flex-start}
+.avatar{width:31px;height:31px;flex-shrink:0;border-radius:10px;display:grid;place-items:center;background:var(--panel2);font-size:14px}
+.message.user .avatar{background:#302b58}
+.content{min-width:0;flex:1}
+.name{font-size:12px;color:var(--muted);margin:2px 0 7px}
+.bubble{overflow-wrap:anywhere;line-height:1.7}
+.message.user .bubble{background:#171d2c;border:1px solid var(--border);border-radius:4px 14px 14px 14px;padding:11px 14px;display:inline-block;max-width:100%}
+.bubble p{margin:0 0 12px}.bubble p:last-child{margin-bottom:0}
+.bubble h1,.bubble h2,.bubble h3{line-height:1.3;margin:18px 0 9px}
+.bubble ul,.bubble ol{padding-left:23px}
+.bubble blockquote{border-left:3px solid var(--accent);margin:12px 0;padding:3px 13px;color:#b8c1d4}
+.bubble code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.88em;background:#20283a;padding:2px 5px;border-radius:5px}
+.bubble pre{position:relative;background:#080c14;border:1px solid var(--border);border-radius:12px;padding:37px 14px 14px;overflow-x:auto;margin:13px 0}
+.bubble pre code{background:none;padding:0;white-space:pre}
+.copy-code{position:absolute;right:8px;top:7px;border:1px solid var(--border);background:var(--panel2);border-radius:7px;padding:4px 8px;font-size:11px}
+.bubble table{border-collapse:collapse;display:block;overflow-x:auto}
+.bubble th,.bubble td{border:1px solid var(--border);padding:7px 10px}
+.bubble a{color:#a99fff}
+.msg-tools{display:flex;gap:7px;margin-top:9px}
+.msg-tools button{border:0;background:transparent;color:var(--muted);font-size:11px;padding:4px}
+.msg-tools button:hover{color:var(--text)}
+.typing{color:var(--muted);font-size:13px}
+.composer-wrap{flex-shrink:0;padding:12px 18px 17px;background:linear-gradient(transparent,#090b12 20%)}
+.composer{max-width:780px;margin:auto;border:1px solid #303b51;background:var(--panel);border-radius:17px;padding:10px 12px;box-shadow:0 10px 40px #0005}
+textarea{width:100%;resize:none;max-height:160px;min-height:42px;border:0;outline:0;background:transparent;color:var(--text);padding:7px 5px}
+.composer-bottom{display:flex;align-items:center;justify-content:space-between}
+.hint{font-size:11px;color:var(--muted)}
+.send{border:0;border-radius:11px;background:linear-gradient(135deg,var(--accent),var(--accent2));padding:9px 17px;font-weight:650}
+.send:disabled{opacity:.45;cursor:not-allowed}
+footer{text-align:center;color:#657086;font-size:10px;padding:0 10px 8px}
+.modal{position:fixed;inset:0;background:#000a;display:none;place-items:center;padding:18px;z-index:5}
+.modal.show{display:grid}
+.dialog{width:min(100%,440px);background:var(--panel);border:1px solid var(--border);border-radius:17px;padding:20px}
+.dialog h2{margin:0 0 15px;font-size:19px}
+.field{margin:13px 0}
+.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+.field input{width:100%;background:#090d16;border:1px solid var(--border);border-radius:9px;padding:11px;color:var(--text);outline:none}
+.field input:focus{border-color:var(--accent)}
+.dialog-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+@media(max-width:600px){header{padding:0 12px}.status{display:none}main{padding:15px 13px}.composer-wrap{padding:9px 10px 12px}.welcome{padding-top:10vh}.hint{font-size:10px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div class="brand"><div class="logo">✦</div><div>Qwen AI<small>ETHEREAL STUDIOS</small></div></div>
+  <div class="actions">
+    <div class="status"><span class="dot" id="dot"></span><span id="status">Not connected</span></div>
+    <button class="btn" id="settings">⚙ Settings</button>
+    <button class="btn" id="newChat">＋ New</button>
+  </div>
+</header>
+
+<main id="main">
+  <div id="messages">
+    <section class="welcome" id="welcome">
+      <div class="orb">✦</div>
+      <h1>What can I help you with?</h1>
+      <p>Chat with Qwen, powered by an AI server hosted on GitHub Actions.</p>
+      <div class="suggestions">
+        <button>Explain how neural networks work</button>
+        <button>Write a Python script</button>
+        <button>Give me a creative idea</button>
+      </div>
+    </section>
+  </div>
+</main>
+
+<div class="composer-wrap">
+  <div class="composer">
+    <textarea id="prompt" rows="1" placeholder="Message Qwen..." autocomplete="off"></textarea>
+    <div class="composer-bottom">
+      <span class="hint">Enter to send · Shift + Enter for new line</span>
+      <button class="send" id="send">↑ Send</button>
+    </div>
+  </div>
+</div>
+<footer>Qwen2.5 1.5B · Ethereal Studios · Responses may contain errors</footer>
+</div>
+
+<div class="modal" id="modal">
+  <div class="dialog">
+    <h2>Connection settings</h2>
+    <div class="field"><label>API endpoint</label><input id="endpoint" placeholder="https://your-tunnel.trycloudflare.com"></div>
+    <div class="field"><label>API key</label><input id="apiKey" type="password" placeholder="Enter your API key"></div>
+    <div class="field"><label>Model name</label><input id="model" value="qwen2.5-1.5b"></div>
+    <p class="hint">Your API key is kept in this browser session and is not saved in the website source.</p>
+    <div class="dialog-actions">
+      <button class="btn" id="closeSettings">Cancel</button>
+      <button class="send" id="saveSettings">Save settings</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const DEFAULT_ENDPOINT = "https://shop-hospitality-earned-knives.trycloudflare.com";
+const $ = id => document.getElementById(id);
+let messages = [];
+let busy = false;
+
+const endpoint = () => (sessionStorage.getItem("qwen_endpoint") || DEFAULT_ENDPOINT).replace(/\/+$/,"");
+const apiKey = () => sessionStorage.getItem("qwen_key") || "";
+const model = () => sessionStorage.getItem("qwen_model") || "qwen2.5-1.5b";
+
+function setStatus(label,online=false){
+  $("status").textContent=label;
+  $("dot").classList.toggle("online",online);
+}
+function scrollBottom(){ $("main").scrollTop=$("main").scrollHeight; }
+function safeMarkdown(text){
+  const html = marked.parse(text || "");
+  return DOMPurify.sanitize(html);
+}
+function render(){
+  $("welcome").style.display=messages.length ? "none" : "block";
+  $("messages").querySelectorAll(".message").forEach(n=>n.remove());
+  messages.forEach((m,i)=>{
+    const el=document.createElement("div");
+    el.className="message "+(m.role==="user"?"user":"assistant");
+    const avatar=m.role==="user"?"●":"✦";
+    const name=m.role==="user"?"You":"Qwen";
+    el.innerHTML=`<div class="avatar">${avatar}</div><div class="content"><div class="name">${name}</div><div class="bubble">${m.role==="assistant"?safeMarkdown(m.content):escapeHTML(m.content)}</div>${m.role==="assistant"&&!m.streaming?'<div class="msg-tools"><button data-copy="'+i+'">Copy response</button></div>':''}</div>`;
+    $("messages").appendChild(el);
+    el.querySelectorAll("pre").forEach(pre=>{
+      const btn=document.createElement("button");
+      btn.className="copy-code";btn.textContent="Copy code";
+      btn.onclick=()=>navigator.clipboard.writeText(pre.querySelector("code")?.innerText||pre.innerText).then(()=>btn.textContent="Copied!");
+      pre.appendChild(btn);
+    });
+  });
+  $("messages").querySelectorAll("[data-copy]").forEach(btn=>{
+    btn.onclick=()=>navigator.clipboard.writeText(messages[Number(btn.dataset.copy)].content).then(()=>btn.textContent="Copied!");
+  });
+  scrollBottom();
+}
+function escapeHTML(s){
+  return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+function saveHistory(){
+  try{localStorage.setItem("qwen_chat_history",JSON.stringify(messages.slice(-60)))}catch(e){}
+}
+function loadHistory(){
+  try{messages=JSON.parse(localStorage.getItem("qwen_chat_history")||"[]")}catch(e){messages=[]}
+  render();
+}
+function openSettings(){
+  $("endpoint").value=endpoint();
+  $("apiKey").value=apiKey();
+  $("model").value=model();
+  $("modal").classList.add("show");
+}
+$("settings").onclick=openSettings;
+$("closeSettings").onclick=()=>$("modal").classList.remove("show");
+$("saveSettings").onclick=()=>{
+  const url=$("endpoint").value.trim();
+  const key=$("apiKey").value.trim();
+  const mod=$("model").value.trim()||"qwen2.5-1.5b";
+  if(!url.startsWith("https://")){alert("Please enter a valid HTTPS API endpoint.");return}
+  if(!key){alert("Please enter your API key.");return}
+  sessionStorage.setItem("qwen_endpoint",url);
+  sessionStorage.setItem("qwen_key",key);
+  sessionStorage.setItem("qwen_model",mod);
+  $("modal").classList.remove("show");
+  setStatus("Settings saved");
+};
+$("newChat").onclick=()=>{
+  if(busy)return;
+  messages=[];
+  localStorage.removeItem("qwen_chat_history");
+  render();
+};
+document.querySelectorAll(".suggestions button").forEach(b=>b.onclick=()=>{
+  $("prompt").value=b.textContent;
+  sendMessage();
+});
+$("prompt").addEventListener("input",()=>{
+  $("prompt").style.height="auto";
+  $("prompt").style.height=Math.min($("prompt").scrollHeight,160)+"px";
+});
+$("prompt").addEventListener("keydown",e=>{
+  if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendMessage()}
+});
+$("send").onclick=sendMessage;
+
+async function sendMessage(){
+  const input=$("prompt");
+  const text=input.value.trim();
+  if(!text||busy)return;
+  if(!apiKey()){openSettings();return}
+  messages.push({role:"user",content:text});
+  input.value="";input.style.height="auto";
+  messages.push({role:"assistant",content:"",streaming:true});
+  busy=true;$("send").disabled=true;setStatus("Connecting...");
+  render();
+  const assistant=messages[messages.length-1];
+  try{
+    const response=await fetch(endpoint()+"/v1/chat/completions",{
+      method:"POST",
+      headers:{"Content-Type":"application/json","Authorization":"Bearer "+apiKey()},
+      body:JSON.stringify({
+        model:model(),
+        messages:messages.slice(0,-1).map(({role,content})=>({role,content})),
+        max_tokens:700,
+        temperature:0.7,
+        stream:true
+      })
+    });
+    if(!response.ok){
+      const err=await response.text();
+      throw new Error("API error "+response.status+": "+err.slice(0,500));
+    }
+    if(!response.body)throw new Error("Streaming is not supported by this browser.");
+    setStatus("Online",true);
+    const reader=response.body.getReader();
+    const decoder=new TextDecoder();
+    let buffer="";
+    while(true){
+      const {value,done}=await reader.read();
+      if(done)break;
+      buffer+=decoder.decode(value,{stream:true});
+      const lines=buffer.split("\n");
+      buffer=lines.pop()||"";
+      for(const line of lines){
+        const trimmed=line.trim();
+        if(!trimmed.startsWith("data:"))continue;
+        const data=trimmed.slice(5).trim();
+        if(data==="[DONE]")continue;
+        try{
+          const packet=JSON.parse(data);
+          assistant.content+=packet.choices?.[0]?.delta?.content||"";
+          render();
+        }catch(e){}
+      }
+    }
+    assistant.streaming=false;
+    if(!assistant.content)assistant.content="I didn't receive a response. Please try again.";
+    setStatus("Online",true);
+  }catch(err){
+    assistant.streaming=false;
+    assistant.content="**Connection error**\n\n"+err.message+"\n\nCheck your API endpoint, API key and server status in Settings.";
+    setStatus("Connection error",false);
+  }finally{
+    busy=false;$("send").disabled=false;
+    saveHistory();render();input.focus();
+  }
+}
+loadHistory();
+if(apiKey())setStatus("Session configured");
+</script>
+</body>
+</html>
